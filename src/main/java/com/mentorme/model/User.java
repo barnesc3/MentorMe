@@ -24,7 +24,7 @@ public class User {
     private Location location;
     private String biography;
     private String profilePicture;
-    private String accountType;
+    private AccountType accountType;
 
     public enum AccountType {
         MENTOR, MENTEE

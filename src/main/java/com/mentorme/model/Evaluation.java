@@ -15,7 +15,7 @@ import java.time.Instant;
 @NoArgsConstructor
 public class Evaluation {
     @Id
-    private String evaulationId;
+    private String evaluationId;
     @DBRef
     private User mentorId;
     @DBRef

@@ -13,5 +13,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class SampleQuestion {
     @Id
     private String questionId;
+    private int questionNumber;
     private String sampleQuestion;
 }

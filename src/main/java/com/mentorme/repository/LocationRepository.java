@@ -1,4 +1,10 @@
 package com.mentorme.repository;
 
-public interface LocationRepository {
+import com.mentorme.model.Location;
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+import java.util.List;
+
+public interface LocationRepository extends MongoRepository<Location, String> {
+    List<Location> findByLocationName(String name);
 }
