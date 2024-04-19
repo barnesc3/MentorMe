@@ -127,7 +127,7 @@ public class UserService {
     }
 
     public List<User> getUserByName(String fullname){
-        return userRepository.findByName(fullname);
+        return userRepository.findByUsername(fullname);
     }
 
 }

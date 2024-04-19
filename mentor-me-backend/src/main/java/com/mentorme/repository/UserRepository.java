@@ -12,7 +12,7 @@ public interface UserRepository extends MongoRepository<User, String> {
     List<User> findByAccountType(User.AccountType accountType);
     List<User> findByLocation(String location);
     List<User> findByEmail(String email);
-    List<User> findByName(String fullName);
+    List<User> findByFullName(String fullName);
 
     List<User> findByBiographyContaining(String keyword);
 
