@@ -1,0 +1,51 @@
+.template{
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.template-mid{
+    width: 100%;
+    height: 50vh;
+}
+
+img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index:-1;
+}
+
+.page-text{
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+}
+
+.page-text h1{
+    font-size: 3rem;
+    font-weight: 800;
+    background: #222;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.page-text p{
+    font-size: 1.3rem;
+    color: #222;
+    padding: 0.5rem 0 2rem 0;
+    text-decoration:solid;
+}
+
+@media screen and (max-width: 55px){
+    .page-text h1{
+        padding: 10px 20px;
+    }
+
+    .page-text p{
+        font-size: 1.1rem;
+        padding: 0 0 2rem 0;
+    }
+}

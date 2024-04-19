@@ -1,0 +1,9 @@
+.description {
+    margin: 4rem 6rem;
+}
+
+.description h1{
+    text-decoration: underline;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
