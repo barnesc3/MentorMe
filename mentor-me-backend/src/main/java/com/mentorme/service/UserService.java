@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import java.util.List;
 
 
@@ -29,6 +28,9 @@ public class UserService {
     private MentorshipRepository mentorshipRepository;
     @Autowired
     private LocationRepository locationRepository;
+
+    @Autowired
+    private SecurityService securityService;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -80,7 +82,7 @@ public class UserService {
         if(!userList.isEmpty()){
             User user = userList.get(0);
 
-            if(userRepository.existsByUsername(user.getUsername())){
+            if (!user.getUsername().equals(updatedUser.getUsername()) && userRepository.existsByUsername(updatedUser.getUsername())) {
                 String errorMessage = "Username is already taken.";
                 throw new ResponseStatusException(HttpStatus.CONFLICT, errorMessage);
             } else {
@@ -107,11 +109,17 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUserByUsername(String username) {
+    public void deleteUserByUsernameAndPassword(String username, String password) {
         List<User> userList = userRepository.findByUsername(username);
         if (!userList.isEmpty()) {
             User user = userList.get(0);
-            userRepository.delete(user);
+            if(securityService.verifyPassword(password, user.getPassword()) == true){
+                userRepository.delete(user);
+            }
+            else {
+                throw new IllegalArgumentException("Passwords Dont Match");
+            }
+
         } else {
             throw new IllegalArgumentException("User not found with username: " + username);
         }

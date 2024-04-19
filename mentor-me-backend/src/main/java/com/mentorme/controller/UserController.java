@@ -26,15 +26,24 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
     }
 
-    @PutMapping("/{username}")
-    public ResponseEntity<String> updateProfile(@PathVariable String username, @RequestBody User updatedUser) {
+    @PutMapping("/update")
+    public ResponseEntity<String> updateProfile(@RequestBody User updatedUser) {
+        String username = updatedUser.getUsername();
+        if (username == null || username.isEmpty()) {
+            return ResponseEntity.badRequest().body("Username is required.");
+        }
         userService.updateProfile(username, updatedUser);
         return ResponseEntity.ok("User profile updated successfully");
     }
 
-    @DeleteMapping("/{username}")
-    public ResponseEntity<String> deleteUserByUsername(@PathVariable String username) {
-        userService.deleteUserByUsername(username);
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteUserByUsername(@RequestBody User updatedUser) {
+        String username = updatedUser.getUsername();
+        if (username == null || username.isEmpty()) {
+            return ResponseEntity.badRequest().body("Username is required.");
+        }
+        String password = updatedUser.getPassword();
+        userService.deleteUserByUsernameAndPassword(username, password);
         return ResponseEntity.ok("User deleted successfully");
     }
 
@@ -68,7 +77,7 @@ public class UserController {
         return ResponseEntity.ok(mentees);
     }
 
-    @GetMapping("/search")
+    @GetMapping("/search/{fullname}")
     public ResponseEntity<List<User>> getUserByName(@RequestParam String fullname) {
         List<User> users = userService.getUserByName(fullname);
         return ResponseEntity.ok(users);
