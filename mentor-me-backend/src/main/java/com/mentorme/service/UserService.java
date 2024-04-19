@@ -33,35 +33,46 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public void registerUser(User user) {
-        if(userRepository.existsByUsername(user.getUsername())){
-            String errorMessage = "Username is already taken.";
-            throw new ResponseStatusException(HttpStatus.CONFLICT, errorMessage);
+        // Check if username is already taken
+        if (userRepository.existsByUsername(user.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username is already taken.");
         }
 
+        // Check if location string is provided
+        String locationName = user.getLocation();
+        if (locationName == null || locationName.isEmpty()) {
+            throw new IllegalArgumentException("Location is required.");
+        }
+
+        // Find the location in the database or save it if it doesn't exist
+        Location existingLocation = locationRepository.findByLocationName(locationName);
+        if (existingLocation == null) {
+            Location newLocation = new Location();
+            newLocation.setLocationName(locationName);
+            existingLocation = locationRepository.save(newLocation);
+        }
+
+        // Hash and set the password
         String hashedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(hashedPassword);
 
+        // Set the location string for the user
+        user.setLocation(locationName);
+
+        // Save the user
         userRepository.save(user);
 
         if (user.getAccountType() == User.AccountType.MENTOR) {
+            // Create and save the Mentorship entity
             Mentorship mentorship = new Mentorship();
             mentorship.setMentorId(user);
             mentorship.setDescription(user.getBiography());
-
-            List<Location> locationList = locationRepository.findByLocationName(user.getLocation().getLocationName());
-            Location location;
-            if (!locationList.isEmpty()) {
-                location = locationList.get(0);
-            } else {
-                Location newLocation = new Location();
-                newLocation.setLocationName(user.getLocation().getLocationName());
-                location = locationRepository.save(newLocation);
-            }
-
-            mentorship.setLocationId(location);
+            // Assuming Mentorship uses a Location entity reference
+            mentorship.setLocationId(existingLocation);
             mentorshipRepository.save(mentorship);
         }
     }
+
 
     @Transactional
     public void updateProfile(String username, User updatedUser){
@@ -81,10 +92,10 @@ public class UserService {
             user.setProfilePicture(updatedUser.getProfilePicture());
 
             if (updatedUser.getLocation() != null) {
-                Location location = updatedUser.getLocation();
-                List<Location> locationList = locationRepository.findByLocationName(location.getLocationName());
-                if (locationList.isEmpty()) {
-                    throw new IllegalArgumentException("List is empty");
+                String location = updatedUser.getLocation();
+                Location existingLocation = locationRepository.findByLocationName(location);
+                if (existingLocation == null) {
+                    throw new IllegalArgumentException("No Location Found");
                 }
                 user.setLocation(location);
             }
