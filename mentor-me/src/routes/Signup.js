@@ -3,9 +3,10 @@ import { auth } from './firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import axios from 'axios';
 
 const Signup = () => {
-
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [biography, setBiography] = useState('');
@@ -16,12 +17,18 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       console.log(userCredential);
       const user = userCredential.user;
       localStorage.setItem('token', user.accessToken);
       localStorage.setItem('user', JSON.stringify(user));
+
+      axios.post('http://localhost:3001/register', {email, password, biography, accountType, location})
+      .then(result => console.log(result))
+      .catch(err => console.log(err))
+
       navigate("/");
     } catch (error) {
       console.error(error);
@@ -70,7 +77,7 @@ const Signup = () => {
             <option value="Mentor" >Mentor</option>
             <option value="Mentee" >Mentee</option>
         </select>
-        <button type="submit" className='signup-button' style={{marginLeft: "200px", width: "200px"}}>Sign Up</button>
+        <button type="submit" className='signup-button' onClick={handleSubmit} style={{marginLeft: "200px", width: "200px"}}>Sign Up</button>
       </form>
       <p style={{margin: "15px"}}>Need to Login? <Link to="/login">Login</Link></p>
     </div>
