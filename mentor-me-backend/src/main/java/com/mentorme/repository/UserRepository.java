@@ -12,13 +12,11 @@ public interface UserRepository extends MongoRepository<User, String> {
     List<User> findByAccountType(User.AccountType accountType);
     List<User> findByLocation(String location);
     List<User> findByEmail(String email);
-    List<User> findByName(String fullName);
+    List<User> findByFullName(String fullName);
 
     List<User> findByBiographyContaining(String keyword);
 
-    @Query("{'accountType': ?0, 'location.locationName': ?1}")
-    List<User> findByAccountTypeAndLocationName(User.AccountType accountType, String locationName);
-
+    List<User> findByAccountTypeAndLocation(User.AccountType accountType, String location);
     Boolean existsByUsername(String username);
 
     @Query("{'location.name': ?0}")

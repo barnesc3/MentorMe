@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import java.util.List;
 
 
@@ -30,38 +29,52 @@ public class UserService {
     @Autowired
     private LocationRepository locationRepository;
 
+    @Autowired
+    private SecurityService securityService;
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public void registerUser(User user) {
-        if(userRepository.existsByUsername(user.getUsername())){
-            String errorMessage = "Username is already taken.";
-            throw new ResponseStatusException(HttpStatus.CONFLICT, errorMessage);
+        // Check if username is already taken
+        if (userRepository.existsByUsername(user.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username is already taken.");
         }
 
+        // Check if location string is provided
+        String locationName = user.getLocation();
+        if (locationName == null || locationName.isEmpty()) {
+            throw new IllegalArgumentException("Location is required.");
+        }
+
+        // Find the location in the database or save it if it doesn't exist
+        Location existingLocation = locationRepository.findByLocationName(locationName);
+        if (existingLocation == null) {
+            Location newLocation = new Location();
+            newLocation.setLocationName(locationName);
+            existingLocation = locationRepository.save(newLocation);
+        }
+
+        // Hash and set the password
         String hashedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(hashedPassword);
 
+        // Set the location string for the user
+        user.setLocation(locationName);
+
+        // Save the user
         userRepository.save(user);
 
         if (user.getAccountType() == User.AccountType.MENTOR) {
+            // Create and save the Mentorship entity
             Mentorship mentorship = new Mentorship();
             mentorship.setMentorId(user);
             mentorship.setDescription(user.getBiography());
-
-            List<Location> locationList = locationRepository.findByLocationName(user.getLocation().getLocationName());
-            Location location;
-            if (!locationList.isEmpty()) {
-                location = locationList.get(0);
-            } else {
-                Location newLocation = new Location();
-                newLocation.setLocationName(user.getLocation().getLocationName());
-                location = locationRepository.save(newLocation);
-            }
-
-            mentorship.setLocationId(location);
+            // Assuming Mentorship uses a Location entity reference
+            mentorship.setLocationId(existingLocation);
             mentorshipRepository.save(mentorship);
         }
     }
+
 
     @Transactional
     public void updateProfile(String username, User updatedUser){
@@ -69,7 +82,7 @@ public class UserService {
         if(!userList.isEmpty()){
             User user = userList.get(0);
 
-            if(userRepository.existsByUsername(user.getUsername())){
+            if (!user.getUsername().equals(updatedUser.getUsername()) && userRepository.existsByUsername(updatedUser.getUsername())) {
                 String errorMessage = "Username is already taken.";
                 throw new ResponseStatusException(HttpStatus.CONFLICT, errorMessage);
             } else {
@@ -81,10 +94,10 @@ public class UserService {
             user.setProfilePicture(updatedUser.getProfilePicture());
 
             if (updatedUser.getLocation() != null) {
-                Location location = updatedUser.getLocation();
-                List<Location> locationList = locationRepository.findByLocationName(location.getLocationName());
-                if (locationList.isEmpty()) {
-                    throw new IllegalArgumentException("List is empty");
+                String location = updatedUser.getLocation();
+                Location existingLocation = locationRepository.findByLocationName(location);
+                if (existingLocation == null) {
+                    throw new IllegalArgumentException("No Location Found");
                 }
                 user.setLocation(location);
             }
@@ -96,11 +109,17 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUserByUsername(String username) {
+    public void deleteUserByUsernameAndPassword(String username, String password) {
         List<User> userList = userRepository.findByUsername(username);
         if (!userList.isEmpty()) {
             User user = userList.get(0);
-            userRepository.delete(user);
+            if(securityService.verifyPassword(password, user.getPassword()) == true){
+                userRepository.delete(user);
+            }
+            else {
+                throw new IllegalArgumentException("Passwords Dont Match");
+            }
+
         } else {
             throw new IllegalArgumentException("User not found with username: " + username);
         }
@@ -119,15 +138,19 @@ public class UserService {
     }
 
     public List<User> getAllMentorsByLocation(String locationName){
-        return userRepository.findByAccountTypeAndLocationName(User.AccountType.MENTOR, locationName);
+        return userRepository.findByAccountTypeAndLocation(User.AccountType.MENTOR, locationName);
     }
 
     public List<User> getAllMenteesByLocation(String locationName){
-        return userRepository.findByAccountTypeAndLocationName(User.AccountType.MENTEE, locationName);
+        return userRepository.findByAccountTypeAndLocation(User.AccountType.MENTEE, locationName);
     }
 
-    public List<User> getUserByName(String fullname){
-        return userRepository.findByName(fullname);
+    public List<User> getUserByFullName(String fullname){
+        return userRepository.findByFullName(fullname);
+    }
+
+    public List<User>  getUserByUsername(String username){
+        return userRepository.findByUsername(username);
     }
 
 }

@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface SampleQuestionRepository extends MongoRepository<SampleQuestion,String> {
     List<SampleQuestion> findByQuestionNumber(int number);
-    List<SampleQuestion> findSampleQuestionContaining(String keyword);
+    List<SampleQuestion> findBySampleQuestionContaining(String keyword);
 
 }
