@@ -16,9 +16,7 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     List<User> findByBiographyContaining(String keyword);
 
-    @Query("{'accountType': ?0, 'location.locationName': ?1}")
-    List<User> findByAccountTypeAndLocationName(User.AccountType accountType, String locationName);
-
+    List<User> findByAccountTypeAndLocation(User.AccountType accountType, String location);
     Boolean existsByUsername(String username);
 
     @Query("{'location.name': ?0}")

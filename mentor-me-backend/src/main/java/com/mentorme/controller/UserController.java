@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.mentorme.model.User;
 import com.mentorme.service.UserService;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class UserController {
         return ResponseEntity.ok("User deleted successfully");
     }
 
-    @GetMapping
+    @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
@@ -67,19 +68,32 @@ public class UserController {
 
     @GetMapping("/mentors/{locationName}")
     public ResponseEntity<List<User>> getAllMentorsByLocation(@PathVariable String locationName) {
-        List<User> mentors = userService.getAllMentorsByLocation(locationName);
+        String decodedLocationName = UriComponentsBuilder.fromUriString(locationName).build().toUriString();
+        List<User> mentors = userService.getAllMentorsByLocation(decodedLocationName);
         return ResponseEntity.ok(mentors);
     }
 
     @GetMapping("/mentees/{locationName}")
     public ResponseEntity<List<User>> getAllMenteesByLocation(@PathVariable String locationName) {
-        List<User> mentees = userService.getAllMenteesByLocation(locationName);
+        String decodedLocationName = UriComponentsBuilder.fromUriString(locationName).build().toUriString();
+        List<User> mentees = userService.getAllMenteesByLocation(decodedLocationName);
         return ResponseEntity.ok(mentees);
     }
 
-    @GetMapping("/search/{fullname}")
-    public ResponseEntity<List<User>> getUserByName(@RequestParam String fullname) {
-        List<User> users = userService.getUserByName(fullname);
+    @GetMapping("/fullname/{fullname}")
+    public ResponseEntity<List<User>> getUserByName(@PathVariable String fullname) {
+        List<User> users = userService.getUserByFullName(fullname);
+        if(users.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(users);
+    }
+    @GetMapping("/username/{username}")
+    public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
+        List<User> userList = userService.getUserByUsername(username);
+        if(userList.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(userList.get(0));
     }
 }

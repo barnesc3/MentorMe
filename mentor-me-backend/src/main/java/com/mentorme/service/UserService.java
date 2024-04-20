@@ -138,15 +138,19 @@ public class UserService {
     }
 
     public List<User> getAllMentorsByLocation(String locationName){
-        return userRepository.findByAccountTypeAndLocationName(User.AccountType.MENTOR, locationName);
+        return userRepository.findByAccountTypeAndLocation(User.AccountType.MENTOR, locationName);
     }
 
     public List<User> getAllMenteesByLocation(String locationName){
-        return userRepository.findByAccountTypeAndLocationName(User.AccountType.MENTEE, locationName);
+        return userRepository.findByAccountTypeAndLocation(User.AccountType.MENTEE, locationName);
     }
 
-    public List<User> getUserByName(String fullname){
-        return userRepository.findByUsername(fullname);
+    public List<User> getUserByFullName(String fullname){
+        return userRepository.findByFullName(fullname);
+    }
+
+    public List<User>  getUserByUsername(String username){
+        return userRepository.findByUsername(username);
     }
 
 }
