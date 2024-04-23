@@ -10,7 +10,8 @@ router.get("/users", async (req,res) => {
         const users = await User.find(
             {$or:[
                 {location:{ $regex: search, $options: "i" }},
-                {biography:{ $regex: search, $options: "i" }}
+                {biography:{ $regex: search, $options: "i" }},
+                {email:{ $regex: search, $options: "i" }}
             ]}
         )
             const total = await User.countDocuments({

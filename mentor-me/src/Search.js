@@ -31,7 +31,7 @@ function Search (){
   useEffect(() =>{
     const getAllUsers = async () => {
         try{
-            const url = `${base_url}?search=${search}`;
+            const url = `http://localhost:8080/api/users?search=${search}`;
             const { data } = await axios.get(url );
             setObj(data);
             console.log(data)
