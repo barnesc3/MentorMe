@@ -7,11 +7,14 @@ import axios from 'axios';
 
 const Signup = () => {
   
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [biography, setBiography] = useState('');
   const [accountType, setType] = useState('');
   const [location, setLocation] = useState('');
+  const requests = useState([]);
+  const matches = useState([]);
 
   const navigate = useNavigate();
 
@@ -25,7 +28,7 @@ const Signup = () => {
       localStorage.setItem('token', user.accessToken);
       localStorage.setItem('user', JSON.stringify(user));
 
-      axios.post('http://localhost:3001/register', {email, password, biography, accountType, location})
+      axios.post('http://localhost:3001/register', {name, email, password, biography, accountType, location, requests, matches})
       .then(result => console.log(result))
       .catch(err => console.log(err))
 
@@ -40,6 +43,14 @@ const Signup = () => {
         <Navbar/>
       <h1 style={{marginTop: "150px", marginBottom: "10px"}}>Sign Up</h1>
       <form onSubmit={handleSubmit} className='signup-form' style={{display: "inline-grid", gridTemplateColumns: "100px 500px", gridTemplateRows: "50px 50px 50px 50px", rowGap: "10px"}}>
+      Name:<input
+          type="name"
+          placeholder="Your Name"
+          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={{marginBottom: "10px", fontSize: "15px"}}
+        />
         Email:<input
           type="email"
           placeholder="Your Email"
